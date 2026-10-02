@@ -9,7 +9,7 @@ const ItemListContainer = ({ limite }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchLocal = fetch("/datos/productos.json").then((res) => res.json());
+    const fetchLocal = fetch("datos/productos.json").then((res) => res.json());
     const fetchKitsu = fetch("https://kitsu.io/api/edge/manga?page[limit]=10")
       .then((res) => res.json())
       .then((data) => {

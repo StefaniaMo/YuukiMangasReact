@@ -8,7 +8,7 @@ const Directorio = () => {
 
   useEffect(() => {
     // Petición al archivo JSON local
-    fetch("/datos/nosotros.json")
+    fetch("datos/nosotros.json")
       .then((respuesta) => {
         if (!respuesta.ok) {
           throw new Error("No se pudo cargar la información del equipo.");

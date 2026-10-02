@@ -34,7 +34,7 @@ const ItemDetailContainer = () => {
           if (isMounted) setLoading(false);
         });
     } else {
-      fetch("/datos/productos.json")
+      fetch("datos/productos.json")
         .then((res) => res.json())
         .then((data) => {
           if (isMounted) {
