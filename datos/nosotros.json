@@ -4,27 +4,27 @@
     "nombre": "Stefania Molina",
     "puesto": "CEO & Fundadora",
     "email": "stefania@yuukimangas.com",
-    "foto": "/images/miku1.jpg"
+    "foto": "images/miku1.jpg"
   },
   {
     "id": 2,
     "nombre": "Jonathan Gonzalez",
     "puesto": "Desarrollador Full Stack",
     "email": "jonathan@yuukimangas.com",
-    "foto": "/images/lenkagamine.jpg"
+    "foto": "images/lenkagamine.jpg"
   },
   {
     "id": 3,
     "nombre": "Amelie Cabrignez",
     "puesto": "Diseñadora UX/UI",
     "email": "amelie@yuukimangas.com",
-    "foto": "/images/tetokasane1.jpg"
+    "foto": "images/tetokasane1.jpg"
   },
   {
     "id": 4,
     "nombre": "Agustín Molina",
     "puesto": "Administrador de Mangas",
     "email": "agustin@yuukimangas.com",
-    "foto": "/images/kaito1.jpg"
+    "foto": "images/kaito1.jpg"
   }
 ]
