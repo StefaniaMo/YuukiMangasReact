@@ -1,0 +1,69 @@
+.card {
+  background-color: #ffffff;
+  border: 2px solid #bdd9a9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(166, 105, 70, 0.1);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(166, 105, 70, 0.2);
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 2px solid #f2c5bb;
+}
+
+.card-content {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #a66946;
+  margin-bottom: 0.5rem;
+}
+
+.card-price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-top: auto;
+  margin-bottom: 1rem;
+}
+
+.card-button {
+  background-color: #bdd9a9; /* Verde menta por defecto */
+  color: #555555;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.1s ease;
+}
+
+.card-button:hover {
+  background-color: #f2c5bb;
+}
+
+/* Efecto al presionar el botón */
+.card-button:active {
+  transform: scale(0.98);
+}

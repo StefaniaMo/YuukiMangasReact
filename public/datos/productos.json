@@ -1,0 +1,50 @@
+[
+  {
+    "id": "haikyu01",
+    "nombre": "Haikyu Vol. 1",
+    "precio": 11000,
+    "categoria": "Shonen",
+    "descripcion": "Shoyo Hinata es un estudiante que se fanatiza con el vóley después de ver un partido en el que la rompía un jugador petiso como él. Esto lo inspira a seguir sus pasos y convertirse en un as aunque tenga que arrancar bien de abajo.",
+    "imagen": "https://i.ibb.co/JWx2Mndf/haikyu-01.jpg"
+  },
+  {
+    "id": "haikyu02",
+    "nombre": "Haikyu Vol. 2",
+    "precio": 11000,
+    "categoria": "Shonen",
+    "descripcion": "Shoyo Hinata es un estudiante que se fanatiza con el vóley después de ver un partido en el que la rompía un jugador petiso como él. Esto lo inspira a seguir sus pasos y convertirse en un as aunque tenga que arrancar bien de abajo.",
+    "imagen": "https://i.ibb.co/hxskGL4f/haikyu-02.jpg"
+  },
+  {
+    "id": "haikyu03",
+    "nombre": "Haikyu Vol. 3",
+    "precio": 11000,
+    "categoria": "Shonen",
+    "descripcion": "Shoyo Hinata es un estudiante que se fanatiza con el vóley después de ver un partido en el que la rompía un jugador petiso como él. Esto lo inspira a seguir sus pasos y convertirse en un as aunque tenga que arrancar bien de abajo.",
+    "imagen": "https://i.ibb.co/prBKVVtD/haikyu-03.jpg"
+  },
+  {
+    "id": "jujutsu01",
+    "nombre": "Jujutsu Kaisen 01",
+    "precio": 16000,
+    "categoria": "Shonen",
+    "descripcion": "Yuji Itadori es un joven con habilidades físicas excepcionales que se une al club de ocultismo de la escuela porque le permite salir temprano y visitar a su abuelo en el hospital. Este, antes de morir, le pide que use su fuerza para ayudar a las personas. Ahí se aparece un estudiante de hechicero, Fushiguro, y le pide a Yuji el objeto maldito que encontró. Él le dice que sus compañeros del club van a abrirlo en la escuela, y ambos corren a rescatarlos. Al llegar, están rodeados de maldiciones (monstruos), y para salvar a sus compañeros, Yuji se traga el objeto maldito y se convierte en Sukuna.",
+    "imagen": "https://i.ibb.co/WLSMcNc/jujutsu-kaisen-01.jpg"
+  },
+  {
+    "id": "jujutsu02",
+    "nombre": "Jujutsu Kaisen 02",
+    "precio": 16000,
+    "categoria": "Shonen",
+    "descripcion": "Yuji Itadori es un joven con habilidades físicas excepcionales que se une al club de ocultismo de la escuela porque le permite salir temprano y visitar a su abuelo en el hospital. Este, antes de morir, le pide que use su fuerza para ayudar a las personas. Ahí se aparece un estudiante de hechicero, Fushiguro, y le pide a Yuji el objeto maldito que encontró. Él le dice que sus compañeros del club van a abrirlo en la escuela, y ambos corren a rescatarlos. Al llegar, están rodeados de maldiciones (monstruos), y para salvar a sus compañeros, Yuji se traga el objeto maldito y se convierte en Sukuna.",
+    "imagen": "https://i.ibb.co/zWdPFfSK/jujutsu-kaisen-02.jpg"
+  },
+  {
+    "id": "jujutsu03",
+    "nombre": "Jujutsu Kaisen 03",
+    "precio": 16000,
+    "categoria": "Shonen",
+    "descripcion": "Yuji Itadori es un joven con habilidades físicas excepcionales que se une al club de ocultismo de la escuela porque le permite salir temprano y visitar a su abuelo en el hospital. Este, antes de morir, le pide que use su fuerza para ayudar a las personas. Ahí se aparece un estudiante de hechicero, Fushiguro, y le pide a Yuji el objeto maldito que encontró. Él le dice que sus compañeros del club van a abrirlo en la escuela, y ambos corren a rescatarlos. Al llegar, están rodeados de maldiciones (monstruos), y para salvar a sus compañeros, Yuji se traga el objeto maldito y se convierte en Sukuna.",
+    "imagen": "https://i.ibb.co/8n9wWFr0/jujutsu-kaisen-03.jpg"
+  }
+]

@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  --color-verde: #bdd9a9;
+  --color-crema: #f2e8c9;
+  --color-terracota: #a66946;
+  --color-durazno: #f2c5bb;
+  --color-texto: #2d2623;
+  --color-texto-default: #555555;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Work Sans", sans-serif;
+  /* Mantiene una buena legibilidad en distintos navegadores */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-crema);
+  color: var(--color-texto-default);
+}
+
+/* Estilos Responsive para el Navbar */
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-desktop {
+    display: none !important;
+  }
+}
