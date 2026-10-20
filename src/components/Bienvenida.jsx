@@ -1,11 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Bienvenida = () => {
-  // Función para hacer scroll suave hacia el catálogo
-  const scrollToProductos = () => {
-    const seccionProductos = document.getElementById("catalogo-mangas");
-    if (seccionProductos) {
-      seccionProductos.scrollIntoView({ behavior: "smooth" });
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Función para ir al catálogo con scroll suave
+  const handleComprarClick = () => {
+    if (location.pathname === "/") {
+      const seccionProductos = document.getElementById("catalogo-mangas");
+      if (seccionProductos) {
+        seccionProductos.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      navigate("/productos");
     }
   };
 
@@ -25,7 +32,7 @@ const Bienvenida = () => {
         gap: "1.2rem",
       }}
     >
-      {/* Insignia / Badge decorativa */}
+      {/* Badge decorativa */}
       <span
         style={{
           backgroundColor: "#F2C5BB",
@@ -37,14 +44,13 @@ const Bienvenida = () => {
           letterSpacing: "0.5px",
         }}
       >
-        Tu tienda de mangas favorita
+        ✨ Tu tienda de mangas favorita
       </span>
 
       {/* Título Principal */}
       <h1
         style={{
           color: "#2d2623",
-          fontFamily: "'Work Sans', sans-serif",
           fontSize: "clamp(2rem, 4vw, 3rem)",
           fontWeight: "800",
           margin: 0,
@@ -55,7 +61,7 @@ const Bienvenida = () => {
         📚🌸
       </h1>
 
-      {/* Subtítulo / Descripción */}
+      {/* Subtítulo */}
       <p
         style={{
           color: "#555",
@@ -92,9 +98,9 @@ const Bienvenida = () => {
           marginTop: "0.5rem",
         }}
       >
-        {/* Botón Comprar: Scroll suave al catálogo */}
+        {/* Botón Comprar */}
         <button
-          onClick={scrollToProductos}
+          onClick={handleComprarClick}
           style={{
             backgroundColor: "#BDD9A9",
             color: "#2d2623",
@@ -119,9 +125,9 @@ const Bienvenida = () => {
           🛒 Comprar Mangas
         </button>
 
-        {/* Botón Vender: Redirige a Contacto */}
+        {/* Botón Vender: Redirige a /vender */}
         <Link
-          to="/contacto"
+          to="/vender"
           style={{
             backgroundColor: "#A66946",
             color: "#ffffff",
