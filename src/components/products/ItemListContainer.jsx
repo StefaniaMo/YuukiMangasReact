@@ -1,103 +1,169 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db, COLECCION_PRODUCTOS } from "../../firebase/config";
+import { useSearch } from "../../context/SearchContext";
 import ItemList from "./ItemList";
+import Paginacion from "../Paginacion";
 
+/**
+ * Componente ItemListContainer
+ * Conecta con Firestore para obtener la colección de mangas ("mangas").
+ * Soporta filtrado en tiempo real mediante SearchContext y paginación en el cliente/catálogo.
+ */
 const ItemListContainer = ({ limite }) => {
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Paginación interna
+  const [paginaActual, setPaginaActual] = useState(1);
+  const elementosPorPagina = 8;
+
+  // Búsqueda en tiempo real desde el Header
+  const { busqueda } = useSearch();
+
+  // Guardamos la búsqueda anterior durante el render para ajustar la página sin disparar un effect
+  const [busquedaAnterior, setBusquedaAnterior] = useState(busqueda);
+  if (busqueda !== busquedaAnterior) {
+    setBusquedaAnterior(busqueda);
+    setPaginaActual(1);
+  }
+
+  // Carga de productos desde Firestore
   useEffect(() => {
-    let isMounted = true;
+    let montado = true;
 
-    const fetchLocal = fetch("datos/productos.json").then((res) => res.json());
-    const fetchKitsu = fetch("https://kitsu.io/api/edge/manga?page[limit]=10")
-      .then((res) => res.json())
-      .then((data) => {
-        return data.data.map((item) => ({
-          id: `kitsu-${item.id}`,
-          nombre: item.attributes.canonicalTitle,
-          precio: Math.floor(Math.random() * 5000) + 8000,
-          categoria: item.attributes.subtype || "Manga",
-          descripcion: item.attributes.synopsis,
-          imagen:
-            item.attributes.posterImage?.small ||
-            item.attributes.posterImage?.original,
+    const cargarProductosFirestore = async () => {
+      setCargando(true);
+      try {
+        const coleccionRef = collection(db, COLECCION_PRODUCTOS);
+        const snapshot = await getDocs(coleccionRef);
+
+        const lista = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
         }));
-      });
 
-    Promise.all([fetchLocal, fetchKitsu])
-      .then(([dataLocal, dataKitsu]) => {
-        if (isMounted) {
-          setProductos([...dataLocal, ...dataKitsu]);
-          setLoading(false);
+        if (montado) {
+          setProductos(lista);
+          setError(null);
         }
-      })
-      .catch((error) => {
-        console.error("Error cargando los productos:", error);
-        if (isMounted) setLoading(false);
-      });
+      } catch (err) {
+        console.error("Error al cargar mangas de Firebase:", err);
+        if (montado) {
+          setError("No se pudieron cargar los productos desde la base de datos.");
+        }
+      } finally {
+        if (montado) setCargando(false);
+      }
+    };
+
+    cargarProductosFirestore();
 
     return () => {
-      isMounted = false;
+      montado = false;
     };
   }, []);
 
-  if (loading) {
+  // Filtrado reactivo en tiempo real
+  const productosFiltrados = productos.filter((prod) => {
+    const termino = busqueda.toLowerCase().trim();
+    const coincideNombre = prod.nombre?.toLowerCase().includes(termino);
+    const coincideCategoria = prod.categoria?.toLowerCase().includes(termino);
+    return coincideNombre || coincideCategoria;
+  });
+
+  // Si se pasa 'limite' (por ejemplo, en la vista de Inicio) recortamos directamente
+  const productosParaMostrar = limite
+    ? productosFiltrados.slice(0, limite)
+    : productosFiltrados;
+
+  // Cálculo de páginas para la vista completa de /productos
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(productosParaMostrar.length / elementosPorPagina)
+  );
+
+  const inicio = (paginaActual - 1) * elementosPorPagina;
+  const productosPaginados = limite
+    ? productosParaMostrar
+    : productosParaMostrar.slice(inicio, inicio + elementosPorPagina);
+
+  // Estado: Cargando
+  if (cargando) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "3rem 0",
-          color: "#A66946",
-          fontWeight: "bold",
-        }}
-      >
-        Cargando catálogo de mangas...
+      <div className="py-16 text-center">
+        <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#BDD9A9] border-t-[#A66946] mb-3"></div>
+        <p className="text-[#A66946] font-bold text-lg">
+          Cargando catálogo de mangas desde Firebase...
+        </p>
       </div>
     );
   }
 
-  // Si pasamos la prop 'limite', recortamos el listado a esa cantidad
-  const productosAMostrar = limite ? productos.slice(0, limite) : productos;
+  // Estado: Error
+  if (error) {
+    return (
+      <div className="my-8 p-6 bg-red-50 border-2 border-red-200 text-red-700 rounded-xl max-w-xl mx-auto text-center">
+        <p className="font-bold text-lg mb-1">⚠️ Error al conectar con Firestore</p>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <section id="catalogo-mangas" style={{ padding: "1rem 0" }}>
-      <h2
-        style={{
-          fontSize: "1.8rem",
-          fontWeight: "800",
-          marginBottom: "1.5rem",
-          color: "#A66946",
-          borderBottom: "2px solid #BDD9A9",
-          paddingBottom: "0.5rem",
-        }}
-      >
-        {limite ? "Mangas Destacados" : "Todos nuestros Mangas"}
-      </h2>
+    <section id="catalogo-mangas" className="py-6">
+      {/* Título de la sección */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 mb-6 border-b-2 border-[#BDD9A9]">
+        <h2 className="text-2xl sm:text-3xl font-black text-[#A66946]">
+          {limite ? "🔥 Mangas Destacados" : "📚 Catálogo Completo de Mangas"}
+        </h2>
+        {busqueda && (
+          <span className="text-xs sm:text-sm text-stone-500 mt-1 sm:mt-0">
+            Filtrando por: <strong>"{busqueda}"</strong> ({productosFiltrados.length}{" "}
+            resultados)
+          </span>
+        )}
+      </div>
 
-      <ItemList productos={productosAMostrar} />
-
-      {/* Si hay límite (Pantalla de Inicio), mostramos el enlace "Ver todo" */}
-      {limite && (
-        <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-          <Link
-            to="/productos"
-            style={{
-              display: "inline-block",
-              backgroundColor: "#A66946",
-              color: "#FFFFFF",
-              padding: "0.8rem 2rem",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              textDecoration: "none",
-              fontSize: "1.05rem",
-              boxShadow: "0 4px 6px rgba(166, 105, 70, 0.2)",
-              transition: "transform 0.2s ease, background-color 0.2s ease",
-            }}
-          >
-            Ver todos los productos →
-          </Link>
+      {/* Si no hay coincidencias */}
+      {productosFiltrados.length === 0 ? (
+        <div className="py-12 px-6 bg-stone-50 border border-stone-200 rounded-2xl text-center max-w-lg mx-auto">
+          <p className="text-lg font-bold text-stone-700 mb-2">
+            No se encontraron mangas
+          </p>
+          <p className="text-sm text-stone-500 mb-4">
+            No hay productos que coincidan con "{busqueda}". Prueba con otro título
+            o categoría.
+          </p>
         </div>
+      ) : (
+        <>
+          {/* Renderizado de la lista de mangas */}
+          <ItemList productos={productosPaginados} />
+
+          {/* Paginador (solo cuando no hay límite y hay más de 1 página) */}
+          {!limite && totalPaginas > 1 && (
+            <Paginacion
+              paginaActual={paginaActual}
+              totalPaginas={totalPaginas}
+              alCambiarPagina={(pag) => setPaginaActual(pag)}
+            />
+          )}
+
+          {/* Botón 'Ver todo' para la página de inicio */}
+          {limite && productos.length > limite && (
+            <div className="text-center mt-10">
+              <Link
+                to="/productos"
+                className="inline-block px-8 py-3 bg-[#A66946] hover:bg-[#8e5737] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
+              >
+                Ver todo el catálogo ({productos.length} mangas) →
+              </Link>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
