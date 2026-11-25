@@ -26,67 +26,26 @@ const Directorio = () => {
   }, []);
 
   return (
-    <section
-      style={{
-        width: "100%",
-        padding: "2.5rem 1rem",
-        backgroundColor: "#FAFAF7",
-        borderTop: "2px dashed #BDD9A9",
-      }}
-    >
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        <h2
-          style={{
-            textAlign: "center",
-            color: "#A66946",
-            marginBottom: "1.8rem",
-            fontSize: "1.8rem",
-          }}
-        >
-          👥 Nuestro Equipo
+    <section className="w-full py-10 px-4 bg-[#FAFAF7] border-t-2 border-dashed border-[#BDD9A9]">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-center text-[#A66946] text-2xl font-black mb-8 tracking-tight">
+          👥 Nuestro Equipo de YuukiMangas
         </h2>
-
-        {/* 1. Renderizado condicional: Cargando */}
+        /* 1. Renderizado condicional: Cargando */
         {cargando && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "2rem",
-              color: "#A66946",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-            }}
-          >
-            ⏳ Cargando equipo de MangaYuuki...
+          <div className="text-center py-8 text-[#A66946] font-semibold text-base">
+            ⏳ Cargando equipo...
           </div>
         )}
-
-        {/* 2. Renderizado condicional: Error */}
+        /* 2. Renderizado condicional: Error */
         {error && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "1.5rem",
-              backgroundColor: "#FFD1D1",
-              color: "#D8000C",
-              borderRadius: "8px",
-              maxWidth: "500px",
-              margin: "0 auto",
-            }}
-          >
-            ⚠️ Ops! Ocurrió un error: {error}
+          <div className="text-center py-4 px-6 bg-red-100 text-red-700 rounded-lg max-w-md mx-auto text-sm">
+            ⚠️ Ocurrió un error: {error}
           </div>
         )}
-
-        {/* 3. Renderizado de Tarjetas en Grilla */}
+        /* 3. Renderizado de Tarjetas en Grilla */
         {!cargando && !error && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {nosotros.map((persona) => (
               <TarjetaContacto key={persona.id} persona={persona} />
             ))}
