@@ -31,19 +31,19 @@ const Directorio = () => {
         <h2 className="text-center text-[#A66946] text-2xl font-black mb-8 tracking-tight">
           👥 Nuestro Equipo de YuukiMangas
         </h2>
-        /* 1. Renderizado condicional: Cargando */
+        {/* 1. Renderizado condicional: Cargando */}
         {cargando && (
           <div className="text-center py-8 text-[#A66946] font-semibold text-base">
             ⏳ Cargando equipo...
           </div>
         )}
-        /* 2. Renderizado condicional: Error */
+        {/* 2. Renderizado condicional: Error */}
         {error && (
           <div className="text-center py-4 px-6 bg-red-100 text-red-700 rounded-lg max-w-md mx-auto text-sm">
             ⚠️ Ocurrió un error: {error}
           </div>
         )}
-        /* 3. Renderizado de Tarjetas en Grilla */
+        {/* 3. Renderizado de Tarjetas en Grilla */}
         {!cargando && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {nosotros.map((persona) => (
