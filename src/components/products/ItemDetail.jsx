@@ -1,115 +1,117 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import ItemCount from "./ItemCount";
+import { useCarrito } from "../../context/CarritoContext";
 
+/**
+ * Componente ItemDetail
+ * Presenta la ficha técnica y sinopsis detallada del manga.
+ * Estilizado completamente con Tailwind CSS.
+ */
 const ItemDetail = ({ producto }) => {
+  const { agregarACarrito } = useCarrito();
   const [mensajeNotif, setMensajeNotif] = useState("");
 
   const handleAgregar = (cantidad) => {
-    const textoMensaje =
+    agregarACarrito({
+      producto: {
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: Number(producto.precio),
+        imagen: producto.imagen,
+        categoria: producto.categoria,
+        stock: producto.stock ?? 10,
+      },
+      cantidad,
+    });
+
+    const texto =
       cantidad === 1
-        ? `Se agregó 1 manga de "${producto.nombre}" a tu carrito`
-        : `Se agregaron ${cantidad} mangas de "${producto.nombre}" a tu carrito`;
+        ? `Se agregó 1 unidad de "${producto.nombre}" al carrito`
+        : `Se agregaron ${cantidad} unidades de "${producto.nombre}" al carrito`;
 
-    setMensajeNotif(textoMensaje);
-
-    setTimeout(() => {
-      setMensajeNotif("");
-    }, 1500);
+    setMensajeNotif(texto);
+    setTimeout(() => setMensajeNotif(""), 2000);
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        borderRadius: "12px",
-        border: "2px solid #BDD9A9",
-        padding: "2rem",
-        maxWidth: "800px",
-        margin: "2rem auto",
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: "2rem",
-        position: "relative",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
-      }}
-    >
-      {/* Portal Centrado en Pantalla */}
+    <article className="bg-white border-2 border-[#BDD9A9] rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto shadow-sm my-8 grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+      {/* Notificación flotante vía Portal */}
       {mensajeNotif &&
         createPortal(
-          <div
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "rgba(189, 217, 169, 0.92)",
-              color: "#2d2623",
-              fontSize: "clamp(1rem, 1.8vw, 1.4rem)", // Crece entre 1rem (móvil) y 1.4rem (pantalla grande)
-              padding: "clamp(1rem, 3vw, 1.5rem) clamp(1.5rem, 3vw, 3rem)", // El relleno también escala de forma fluida
-              borderRadius: "16px",
-              fontWeight: "bold",
-              textAlign: "center",
-              zIndex: 99999,
-              boxShadow: "0 8px 30px rgba(0, 0, 0, 0.2)",
-              backdropFilter: "blur(6px)",
-              border: "2px solid rgba(255, 255, 255, 0.6)",
-              maxWidth: "90vw",
-              width: "max-content",
-            }}
-          >
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#BDD9A9]/95 text-[#2d2623] px-6 py-4 rounded-2xl font-bold text-center z-[99999] shadow-2xl backdrop-blur-sm border-2 border-white max-w-sm">
             {mensajeNotif}
           </div>,
-          document.body,
+          document.body
         )}
 
-      <img
-        src={producto.imagen}
-        alt={producto.nombre}
-        style={{
-          width: "100%",
-          maxHeight: "400px",
-          objectFit: "contain",
-          borderRadius: "8px",
-        }}
-      />
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <h2
-          style={{ color: "#A66946", fontSize: "2rem", marginBottom: "0.5rem" }}
-        >
-          {producto.nombre}
-        </h2>
-        <span
-          style={{
-            backgroundColor: "#F2C5BB",
-            color: "#A66946",
-            padding: "0.2rem 0.6rem",
-            borderRadius: "4px",
-            width: "fit-content",
-            fontSize: "0.85rem",
-            fontWeight: "bold",
-            marginBottom: "1rem",
+      {/* Portada del manga */}
+      <div className="flex items-center justify-center bg-stone-50 rounded-xl p-4 overflow-hidden border border-stone-200">
+        <img
+          src={producto.imagen || "https://via.placeholder.com/350x500?text=YuukiMangas"}
+          alt={producto.nombre}
+          className="max-h-[420px] w-auto object-contain rounded-lg shadow-sm"
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/350x500?text=YuukiMangas";
           }}
-        >
-          {producto.categoria}
-        </span>
-        <p style={{ color: "#555", lineHeight: "1.6", marginBottom: "1.5rem" }}>
-          {producto.descripcion}
-        </p>
-        <p
-          style={{
-            fontSize: "1.8rem",
-            fontWeight: "800",
-            color: "#2d2623",
-            marginBottom: "1.5rem",
-          }}
-        >
-          ${producto.precio}
-        </p>
-
-        <ItemCount stock={10} inicial={1} onAdd={handleAgregar} />
+        />
       </div>
-    </div>
+
+      {/* Información detallada */}
+      <div className="flex flex-col justify-between">
+        <div>
+          {/* Categoría */}
+          {producto.categoria && (
+            <span className="inline-block bg-[#F2C5BB] text-[#A66946] text-xs font-bold px-3 py-1 rounded-full mb-3">
+              {producto.categoria}
+            </span>
+          )}
+
+          {/* Título */}
+          <h2 className="text-2xl sm:text-3xl font-black text-[#2d2623] mb-3 leading-snug">
+            {producto.nombre}
+          </h2>
+
+          {/* Sinopsis */}
+          <p className="text-stone-600 text-sm leading-relaxed mb-6 whitespace-pre-line">
+            {producto.descripcion || "Sinopsis no disponible en este momento."}
+          </p>
+        </div>
+
+        <div>
+          {/* Precio y Stock */}
+          <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-stone-200">
+            <div>
+              <span className="text-xs text-stone-500 font-bold block">PRECIO UNITARIO</span>
+              <span className="text-3xl font-black text-[#A66946]">
+                ${Number(producto.precio).toLocaleString()}
+              </span>
+            </div>
+            <span className="text-xs font-semibold text-stone-500">
+              Stock disponible: <strong>{producto.stock ?? 10} unidades</strong>
+            </span>
+          </div>
+
+          {/* Selector de cantidad y compra */}
+          <ItemCount
+            stock={producto.stock ?? 10}
+            inicial={1}
+            onAdd={handleAgregar}
+          />
+
+          {/* Enlace para volver */}
+          <div className="mt-4 text-center">
+            <Link
+              to="/productos"
+              className="text-xs font-bold text-stone-500 hover:text-[#A66946] transition-colors"
+            >
+              ← Volver al catálogo de mangas
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 };
 

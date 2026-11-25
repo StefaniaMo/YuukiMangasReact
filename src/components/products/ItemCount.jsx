@@ -1,77 +1,58 @@
 import { useState } from "react";
-import styles from "./TarjetaProducto.module.css";
-
+/**
+ * Componente ItemCount
+ * Selector interactivo de cantidad (+ / -) y botón para agregar al carrito.
+ * Estilizado completamente con Tailwind CSS.
+ */
 const ItemCount = ({ stock = 10, inicial = 1, onAdd }) => {
   const [contador, setContador] = useState(inicial);
 
   const incrementar = () => {
-    if (contador < stock) setContador(contador + 1);
+    if (contador < stock) setContador((prev) => prev + 1);
   };
 
   const decrementar = () => {
-    if (contador > 1) setContador(contador - 1);
+    if (contador > 1) setContador((prev) => prev - 1);
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        marginTop: "auto",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "0.8rem",
-          backgroundColor: "#F2E8C9",
-          padding: "0.3rem 0.6rem",
-          borderRadius: "6px",
-        }}
-      >
+    <div className="flex flex-col gap-2 mt-auto">
+      {/* Controles de incremento y decremento */}
+      <div className="flex items-center justify-center gap-3 bg-[#F2E8C9] py-1 px-3 rounded-lg border border-[#A66946]/20">
         <button
+          type="button"
           onClick={decrementar}
-          style={{
-            border: "none",
-            backgroundColor: "#A66946",
-            color: "white",
-            fontWeight: "bold",
-            borderRadius: "4px",
-            width: "24px",
-            height: "24px",
-            cursor: "pointer",
-          }}
+          disabled={contador <= 1}
+          aria-label="Disminuir cantidad"
+          className="w-7 h-7 bg-[#A66946] hover:bg-[#8e5737] disabled:opacity-50 text-white font-bold rounded flex items-center justify-center transition-colors text-base"
         >
           -
         </button>
 
-        <span style={{ fontWeight: "bold", color: "#2d2623" }}>{contador}</span>
+        <span className="font-bold text-[#2d2623] min-w-[24px] text-center text-sm">
+          {contador}
+        </span>
 
         <button
+          type="button"
           onClick={incrementar}
-          style={{
-            border: "none",
-            backgroundColor: "#A66946",
-            color: "white",
-            fontWeight: "bold",
-            borderRadius: "4px",
-            width: "24px",
-            height: "24px",
-            cursor: "pointer",
-          }}
+          disabled={contador >= stock}
+          aria-label="Aumentar cantidad"
+          className="w-7 h-7 bg-[#A66946] hover:bg-[#8e5737] disabled:opacity-50 text-white font-bold rounded flex items-center justify-center transition-colors text-base"
         >
           +
         </button>
       </div>
 
+      {/* Botón principal de compra */}
       <button
+        type="button"
         onClick={() => onAdd && onAdd(contador)}
-        className={styles["card-button"]}
+        disabled={stock <= 0}
+        className="w-full py-2 px-3 bg-[#A66946] hover:bg-[#8e5737] disabled:bg-stone-300 text-white text-xs sm:text-sm font-bold rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5"
       >
-        Agregar al Carrito 🛒
+        <span>🛒</span>
+        <span>{stock > 0 ? "Agregar al Carrito" : "Sin Stock"}</span>
       </button>
     </div>
   );
