@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import styles from "./TarjetaProducto.module.css";
 import ItemCount from "./ItemCount";
+import { useCarrito } from "../../context/CarritoContext";
 
-const Item = ({ id, nombre, precio, descripcion, imagen }) => {
+/**
+ * Componente Item
+ * Renderiza la tarjeta de un manga con foto, precio, categorías, favoritos y compra directa.
+ * Estilizado completamente con Tailwind CSS.
+ */
+const Item = ({ id, nombre, precio, descripcion, imagen, categoria, stock = 10 }) => {
+  const { agregarACarrito } = useCarrito();
   const [esFavorito, setEsFavorito] = useState(false);
   const [mensajeNotif, setMensajeNotif] = useState("");
 
-  const recortarTexto = (texto, limite = 90) => {
+  // Recorta textos extensos para conservar la armonía visual de las cards
+  const recortarTexto = (texto, limite = 85) => {
     if (!texto) return "";
-    if (texto.length <= limite) return texto;
-    return texto.substring(0, limite) + "...";
+    return texto.length <= limite ? texto : texto.substring(0, limite) + "...";
   };
 
   const toggleFavorito = (e) => {
@@ -19,125 +25,95 @@ const Item = ({ id, nombre, precio, descripcion, imagen }) => {
     setEsFavorito((prev) => !prev);
   };
 
+  // Maneja la acción de agregar al contexto global del carrito
   const handleAgregar = (cantidad) => {
-    const textoMensaje =
+    agregarACarrito({
+      producto: { id, nombre, precio: Number(precio), imagen, categoria, stock },
+      cantidad,
+    });
+
+    const texto =
       cantidad === 1
-        ? `Se agregó 1 manga de "${nombre}" a tu carrito`
-        : `Se agregaron ${cantidad} mangas de "${nombre}" a tu carrito`;
+        ? `Se agregó 1 unidad de "${nombre}" al carrito`
+        : `Se agregaron ${cantidad} unidades de "${nombre}" al carrito`;
 
-    setMensajeNotif(textoMensaje);
-
-    setTimeout(() => {
-      setMensajeNotif("");
-    }, 1500);
+    setMensajeNotif(texto);
+    setTimeout(() => setMensajeNotif(""), 2000);
   };
 
   return (
-    <div className={styles.card} style={{ position: "relative" }}>
-      {/* Portal para forzar el centrado en la PANTALLA (no en la card) */}
+    <article className="relative bg-white border-2 border-[#BDD9A9] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group">
+      {/* Notificación flotante con Portal */}
       {mensajeNotif &&
         createPortal(
-          <div
-            style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "rgba(189, 217, 169, 0.92)", // Verde clarito semi-transparente
-              color: "#2d2623",
-              padding: "1.2rem 2.2rem",
-              borderRadius: "16px",
-              fontSize: "1.05rem",
-              fontWeight: "bold",
-              textAlign: "center",
-              zIndex: 99999,
-              boxShadow: "0 8px 30px rgba(0, 0, 0, 0.2)",
-              backdropFilter: "blur(6px)", // Efecto de cristal esmerilado
-              border: "2px solid rgba(255, 255, 255, 0.6)",
-              maxWidth: "90vw",
-              width: "max-content",
-            }}
-          >
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#BDD9A9]/95 text-[#2d2623] px-6 py-4 rounded-2xl font-bold text-sm sm:text-base text-center z-[99999] shadow-2xl backdrop-blur-sm border-2 border-white max-w-sm">
             {mensajeNotif}
           </div>,
-          document.body,
+          document.body
         )}
 
-      {/* Botón de Favorito */}
+      {/* Botón de Favorito flotante */}
       <button
         onClick={toggleFavorito}
         title={esFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          backgroundColor: "rgba(255, 255, 255, 0.85)",
-          border: "none",
-          borderRadius: "50%",
-          width: "36px",
-          height: "36px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          fontSize: "1.2rem",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
-          zIndex: 10,
-        }}
+        className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 shadow-md flex items-center justify-center text-lg hover:scale-110 transition-transform"
       >
-        <span style={{ color: esFavorito ? "#e63946" : "#ccc" }}>
-          {esFavorito ? "❤️" : "🤍"}
-        </span>
+        <span>{esFavorito ? "❤️" : "🤍"}</span>
       </button>
 
-      {/* Imagen del manga */}
-      <Link to={`/producto/${id}`}>
-        <img src={imagen} alt={nombre} className={styles["card-image"]} />
+      {/* Imagen del manga con enlace al detalle */}
+      <Link
+        to={`/producto/${id}`}
+        className="block bg-stone-100 overflow-hidden aspect-[3/4] flex items-center justify-center"
+      >
+        <img
+          src={imagen || "https://via.placeholder.com/300x400?text=Sin+Imagen"}
+          alt={nombre}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/300x400?text=YuukiMangas";
+          }}
+        />
       </Link>
 
-      <div className={styles["card-content"]}>
+      {/* Cuerpo y datos de la tarjeta */}
+      <div className="p-4 flex flex-col flex-grow">
+        {/* Categoría / Etiqueta */}
+        {categoria && (
+          <span className="self-start text-[11px] font-bold text-[#A66946] bg-[#F2C5BB]/60 px-2 py-0.5 rounded-md mb-2">
+            {categoria}
+          </span>
+        )}
+
         {/* Título */}
-        <Link to={`/producto/${id}`} style={{ textDecoration: "none" }}>
-          <h3 className={styles["card-title"]}>{nombre}</h3>
+        <Link to={`/producto/${id}`} className="hover:underline">
+          <h3 className="font-bold text-[#2d2623] text-base line-clamp-1 mb-1">
+            {nombre}
+          </h3>
         </Link>
 
-        {/* Descripción recortada */}
-        <p
-          style={{
-            fontSize: "0.85rem",
-            color: "#555",
-            marginBottom: "0.8rem",
-            minHeight: "2.8rem",
-          }}
-        >
+        {/* Descripción breve */}
+        <p className="text-stone-500 text-xs min-h-[2.5rem] mb-3 leading-relaxed">
           {recortarTexto(descripcion)}
         </p>
 
-        <p className={styles["card-price"]}>${precio}</p>
+        {/* Precio destacado */}
+        <p className="text-xl font-black text-[#A66946] mb-3">
+          ${Number(precio).toLocaleString()}
+        </p>
 
-        {/* Link al detalle completo */}
+        {/* Enlace para ver detalle */}
         <Link
           to={`/producto/${id}`}
-          style={{
-            display: "block",
-            backgroundColor: "#A66946",
-            color: "#FFFFFF",
-            textAlign: "center",
-            padding: "0.4rem",
-            borderRadius: "6px",
-            fontSize: "0.85rem",
-            fontWeight: "bold",
-            marginBottom: "0.8rem",
-            textDecoration: "none",
-          }}
+          className="text-center text-xs font-bold text-[#A66946] hover:text-[#8e5737] hover:underline mb-3"
         >
-          Ver detalle completo →
+          Ver sinopsis completa →
         </Link>
 
-        {/* Contador de unidades */}
-        <ItemCount stock={10} inicial={1} onAdd={handleAgregar} />
+        {/* Contador y botón de compra */}
+        <ItemCount stock={stock} inicial={1} onAdd={handleAgregar} />
       </div>
-    </div>
+    </article>
   );
 };
 
