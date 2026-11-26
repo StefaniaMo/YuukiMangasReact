@@ -6,7 +6,9 @@ import { db, COLECCION_PRODUCTOS } from "../../firebase/config";
 /**
  * Componente FormProductoContainer
  * Manejador del CRUD de productos (creación y edición) conectado a Firestore ("mangas").
- * Soporta carga de portadas a ImgBB mediante API key y validaciones de formulario.
+ * Soporta:
+ * 1) Subida de archivo binario desde la PC hacia ImgBB (o fallback a Base64 si falla la API).
+ * 2) Inserción directa de URL/enlace web de la imagen.
  */
 const estadoInicial = {
   nombre: "",
@@ -17,21 +19,25 @@ const estadoInicial = {
   imagen: "",
 };
 
+// API Key válida para el endpoint de ImgBB
+const IMGBB_API_KEY_DEFAULT = "4bc89d90e5ba2ca799b0f1339650ce18";
+
 const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
   const [datosForm, setDatosForm] = useState(() =>
     productoAEditar ? { ...estadoInicial, ...productoAEditar } : estadoInicial
   );
-  const [imagen, setImagen] = useState(null);
+  const [imagenFile, setImagenFile] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({});
 
-  // Maneja la sincronización cuando cambia productoAEditar durante el renderizado (sin useEffect innecesario)
+  // Sincronización durante el renderizado si productoAEditar cambia externamente
   const [prevProductoAEditar, setPrevProductoAEditar] = useState(productoAEditar);
   if (productoAEditar !== prevProductoAEditar) {
     setPrevProductoAEditar(productoAEditar);
     setDatosForm(
       productoAEditar ? { ...estadoInicial, ...productoAEditar } : estadoInicial
     );
+    setImagenFile(null);
     setErrores({});
   }
 
@@ -49,10 +55,16 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
 
   const manejarCambioImagen = (evento) => {
     const archivo = evento.target.files && evento.target.files[0];
-    setImagen(archivo || null);
+    setImagenFile(archivo || null);
     if (archivo && errores.imagen) {
       setErrores((prev) => ({ ...prev, imagen: null }));
     }
+  };
+
+  const eliminarImagenFile = () => {
+    setImagenFile(null);
+    const input = document.getElementById("file-upload");
+    if (input) input.value = "";
   };
 
   const validarFormulario = () => {
@@ -82,28 +94,54 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
       nuevosErrores.descripcion = "La sinopsis o descripción es requerida.";
     }
 
-    if (!productoAEditar && !imagen) {
-      nuevosErrores.imagen = "Debes seleccionar una imagen para la portada.";
+    // Se requiere tener al menos o un archivo subido o una URL válida ingresada
+    const tieneUrl = Boolean(datosForm.imagen?.trim());
+    if (!productoAEditar && !imagenFile && !tieneUrl) {
+      nuevosErrores.imagen =
+        "Debes seleccionar una imagen desde tu PC o pegar el link de una URL.";
     }
 
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
   };
 
+  // Convierte un archivo local a Data URL Base64 como alternativa segura
+  const convertirABase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const subirImagenImgbb = async (file) => {
-    const apiKey =
-      import.meta.env.VITE_IMGBB_API_KEY || "4bc89d90e5ba2ca799b0f1339650ce18";
+    // Si la variable de entorno es una URL de perfil en vez de una clave alfanumérica, usamos la key por defecto
+    const envKey = import.meta.env.VITE_IMGBB_API_KEY;
+    const esClaveValida =
+      envKey && !envKey.includes("http") && envKey.trim().length >= 20;
+    const apiKey = esClaveValida ? envKey.trim() : IMGBB_API_KEY_DEFAULT;
+
     const formData = new FormData();
     formData.append("image", file);
 
-    const respuesta = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-      method: "POST",
-      body: formData,
-    });
+    const respuesta = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     const datos = await respuesta.json();
     if (!datos.success) {
-      throw new Error("No se pudo subir la imagen a ImgBB.");
+      console.warn(
+        "ImgBB falló:",
+        datos.error?.message,
+        "- Se usará Data URL Base64."
+      );
+      // Fallback: si ImgBB rechaza la imagen o el formato, convertimos a Base64 para no bloquear al usuario
+      return await convertirABase64(file);
     }
     return datos.data.url;
   };
@@ -116,11 +154,11 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
     setCargando(true);
 
     try {
-      let urlImagen = datosForm.imagen || "";
+      let urlImagenFinal = datosForm.imagen?.trim() || "";
 
-      // Si el usuario seleccionó un nuevo archivo de imagen
-      if (imagen) {
-        urlImagen = await subirImagenImgbb(imagen);
+      // Si el usuario eligió un archivo desde su PC, intentamos subirlo a ImgBB
+      if (imagenFile) {
+        urlImagenFinal = await subirImagenImgbb(imagenFile);
       }
 
       const datosAEnviar = {
@@ -129,7 +167,7 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
         categoria: datosForm.categoria.trim(),
         precio: Number(datosForm.precio),
         stock: Number(datosForm.stock),
-        imagen: urlImagen,
+        imagen: urlImagenFinal,
       };
 
       if (productoAEditar) {
@@ -155,10 +193,10 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
       }
 
       setDatosForm(estadoInicial);
-      setImagen(null);
+      setImagenFile(null);
     } catch (error) {
       console.error("Error al procesar producto:", error);
-      alert("Hubo un error al guardar el producto en Firebase.");
+      alert("Hubo un error al guardar el producto en Firebase: " + error.message);
     } finally {
       setCargando(false);
     }
@@ -170,6 +208,8 @@ const FormProductoContainer = ({ productoAEditar, onProductoAgregado }) => {
         manejarCambio={manejarCambio}
         manejarEnvio={manejarEnvio}
         manejarCambioImagen={manejarCambioImagen}
+        eliminarImagenFile={eliminarImagenFile}
+        imagenFile={imagenFile}
         datosForm={datosForm}
         cargando={cargando}
         esEdicion={!!productoAEditar}
