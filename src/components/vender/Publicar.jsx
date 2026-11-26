@@ -1,19 +1,23 @@
-import { FormProductoContainer } from "./FormProductoContainer";
+import FormProductoContainer from "../products/FormProductoContainer";
 
+/**
+ * Vista Publicar
+ * Permite a los usuarios cargar mangas al catálogo directamente.
+ * Usa el contenedor de formulario unificado en Tailwind CSS.
+ */
 const Publicar = () => {
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-[#-a66946] mb-2">
-          Publicá tus Mangas en YuukiMangas 📦🌸
-        </h1>
-        <p className="text-slate-600">
-          Completá los datos y subí la foto del tomo que querés publicar.
+    <div className="py-8 max-w-xl mx-auto px-4">
+      <div className="bg-white border-2 border-[#BDD9A9] rounded-2xl p-6 sm:p-8 shadow-sm">
+        <h2 className="text-2xl font-black text-[#A66946] text-center mb-1">
+          📦 Publicar Manga
+        </h2>
+        <p className="text-xs text-stone-500 text-center mb-6">
+          Completa los datos del tomo para sumarlo a la colección de YuukiMangas.
         </p>
-      </div>
 
-      {/* Renderizamos el formulario contenedor */}
-      <FormProductoContainer />
+        <FormProductoContainer />
+      </div>
     </div>
   );
 };
