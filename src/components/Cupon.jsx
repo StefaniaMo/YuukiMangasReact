@@ -3,14 +3,16 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config";
 
 /**
- * Componente Cupón
- * Muestra los cupones promocionales activos cargados desde Firestore ('cupones').
+ * Componente Cupon
+ * Muestra los cupones promocionales activos cargados desde Firestore ('cupones')
+ * con un botón para copiar el código directamente al portapapeles.
  * Estilizado completamente con Tailwind CSS.
  */
 const Cupon = () => {
   const [cupones, setCupones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [copiadoId, setCopiadoId] = useState(null);
 
   useEffect(() => {
     const fetchCupones = async () => {
@@ -32,6 +34,16 @@ const Cupon = () => {
 
     fetchCupones();
   }, []);
+
+  const copiarCodigo = async (id, codigo) => {
+    try {
+      await navigator.clipboard.writeText(codigo);
+      setCopiadoId(id);
+      setTimeout(() => setCopiadoId(null), 2000);
+    } catch (err) {
+      console.error("No se pudo copiar al portapapeles:", err);
+    }
+  };
 
   return (
     <section className="bg-white border-2 border-[#BDD9A9] rounded-2xl p-6 shadow-sm">
@@ -73,14 +85,28 @@ const Cupon = () => {
           {cupones.map((cupon) => (
             <article
               key={cupon.id}
-              className="bg-[#FAFAF7] border-2 border-dashed border-[#A66946]/40 rounded-xl p-4 flex items-center justify-between shadow-sm"
+              className="bg-[#FAFAF7] border-2 border-dashed border-[#A66946]/40 rounded-xl p-4 flex flex-col gap-3 shadow-sm"
             >
-              <span className="font-mono font-bold text-[#2d2623] text-sm tracking-wider uppercase">
-                {cupon.codigo}
-              </span>
-              <span className="px-2.5 py-1 bg-[#BDD9A9] text-[#2d2623] text-xs font-black rounded-lg">
-                -{cupon.descuento}%
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-[#2d2623] text-sm tracking-wider uppercase">
+                  {cupon.codigo}
+                </span>
+                <span className="px-2.5 py-1 bg-[#BDD9A9] text-[#2d2623] text-xs font-black rounded-lg">
+                  -{cupon.descuento}%
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => copiarCodigo(cupon.id, cupon.codigo)}
+                className={`w-full py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  copiadoId === cupon.id
+                    ? "bg-[#BDD9A9] text-[#2d2623]"
+                    : "bg-[#A66946] hover:bg-[#8e5737] text-white"
+                }`}
+              >
+                {copiadoId === cupon.id ? "✓ ¡Código copiado!" : "📋 Copiar código"}
+              </button>
             </article>
           ))}
         </div>
